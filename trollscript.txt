@@ -32,7 +32,7 @@ bad.Visible = not bad.Visible
 -- Function to run on click
 local function onButtonClicked()
   humanoid.Health = 0
-  textLabel.Enabled = not textLabel.Visible
+  textLabel.Visible = not textLabel.Visible
   bad.Visible = bad.Visible
 end
 
