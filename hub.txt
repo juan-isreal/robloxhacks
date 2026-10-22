@@ -1,1 +1,178 @@
 
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "ResetMenuGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
+
+-- 1. Open Button (Placed in the top-left corner)
+local openButton = Instance.new("TextButton")
+openButton.Name = "OpenButton"
+openButton.Size = UDim2.new(0, 90, 0, 50)
+openButton.Position = UDim2.new(0, 25, 0, 25)
+openButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+openButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+openButton.TextSize = 18
+openButton.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Bold)
+openButton.Text = "Open"
+openButton.Parent = screenGui
+
+local openCorner = Instance.new("UICorner")
+openCorner.CornerRadius = UDim.new(0, 8)
+openCorner.Parent = openButton
+
+-- 2. Frame (Large centered box)
+local frame = Instance.new("Frame")
+frame.Name = "Frame"
+frame.Size = UDim2.new(0, 450, 0, 520)
+frame.Position = UDim2.new(0.5, -225, 0.5, -260)
+frame.BackgroundColor3 = Color3.fromRGB(215, 215, 215)
+frame.BorderSizePixel = 0
+frame.Visible = false
+frame.Parent = screenGui
+
+local frameCorner = Instance.new("UICorner")
+frameCorner.CornerRadius = UDim.new(0, 10)
+frameCorner.Parent = frame
+
+-- 3. Reset Button (Placed near the top inside the frame)
+local resetButton = Instance.new("TextButton")
+resetButton.Name = "ResetButton"
+resetButton.Size = UDim2.new(0, 160, 0, 45)
+resetButton.Position = UDim2.new(0.5, -80, 0, 30)
+resetButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+resetButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+resetButton.TextSize = 18
+resetButton.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Bold)
+resetButton.Text = "Reset"
+resetButton.Parent = frame
+
+local resetCorner = Instance.new("UICorner")
+resetCorner.CornerRadius = UDim.new(0, 8)
+resetCorner.Parent = resetButton
+-- 4. Fly Button
+local flyButton = Instance.new("TextButton")
+flyButton.Name = "FlyButton"
+flyButton.Size = UDim2.new(0, 160, 0, 45)
+flyButton.Position = UDim2.new(0.5, -80, 0, 100)
+flyButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+flyButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+flyButton.TextSize = 18
+flyButton.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Bold)
+flyButton.Text = "Fly"
+flyButton.Parent = frame
+local flyUiCorner = Instance.new("UICorner")
+flyUiCorner.CornerRadius = UDim.new(0, 8)
+flyUiCorner.Parent = flyButton
+flyButton.Activated:Connect(function()
+	local UserInputService = game:GetService("UserInputService")
+	local character = player.Character
+	local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	local camera = workspace.CurrentCamera
+
+	if not rootPart or not humanoid then return end
+
+	-- Check if we are already flying by looking for our existing force
+	local existingForce = rootPart:FindFirstChild("FlyVelocity")
+	local existingGyro = rootPart:FindFirstChild("FlyGyro")
+
+	if existingForce then
+		-- Turn OFF flight
+		existingForce:Destroy()
+		if existingGyro then existingGyro:Destroy() end
+		flyButton.Text = "Fly: OFF"
+		humanoid.PlatformStand = false
+	else
+		-- Turn ON flight
+		flyButton.Text = "Fly: ON"
+		humanoid.PlatformStand = true
+
+		-- Movement Force (Handles moving and freezing)
+		local bodyVelocity = Instance.new("BodyVelocity")
+		bodyVelocity.Name = "FlyVelocity"
+		bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
+		bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+		bodyVelocity.Parent = rootPart
+
+		-- Rotation Force (Forces your character to face wherever your camera faces)
+		local bodyGyro = Instance.new("BodyGyro")
+		bodyGyro.Name = "FlyGyro"
+		bodyGyro.MaxTorque = Vector3.new(100000, 100000, 100000)
+		bodyGyro.CFrame = camera.CFrame
+		bodyGyro.Parent = rootPart
+
+		-- Core flight loop
+		task.spawn(function()
+			local FLY_SPEED = 50
+
+			while rootPart and rootPart:FindFirstChild("FlyVelocity") and humanoid.Health > 0 do
+				-- Force the character's body orientation to match the camera angle
+				bodyGyro.CFrame = camera.CFrame
+
+				-- Track manual vertical inputs (Q up, E down)
+				local upDownMovement = 0
+				if UserInputService:IsKeyDown(Enum.KeyCode.Q) then
+					upDownMovement = 1
+				elseif UserInputService:IsKeyDown(Enum.KeyCode.E) then
+					upDownMovement = -1
+				end
+
+				-- Check if any movement inputs are active
+				if humanoid.MoveDirection.Magnitude > 0 or upDownMovement ~= 0 then
+					-- Translate your keyboard inputs directly into the camera's local 3D orientation space
+					local localDirection = Vector3.new(
+						humanoid.MoveDirection.X, 
+						upDownMovement, 
+						humanoid.MoveDirection.Z
+					)
+
+					-- Transform the direction into the real workspace coordinates based on where you are looking
+					local worldDirection = camera.CFrame:VectorToWorldSpace(Vector3.new(localDirection.X, 0, localDirection.Z))
+
+					-- Combine camera pitch movement with manual Q/E upward/downward thrust
+					local finalVelocity = worldDirection + Vector3.new(0, localDirection.Y, 0)
+
+					-- Apply the movement vector scaled by your flight speed
+					bodyVelocity.Velocity = finalVelocity.Unit * FLY_SPEED
+				else
+					-- Freeze perfectly still in mid-air when no keys are pressed
+					bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+				end
+
+				task.wait()
+			end
+
+			-- Safety cleanup in case the loop breaks or player dies
+			if flyButton.Text == "Fly: ON" then
+				flyButton.Text = "Fly: OFF"
+				if humanoid then humanoid.PlatformStand = false end
+			end
+		end)
+	end
+end)
+
+
+
+-- Character Reset Logic
+resetButton.Activated:Connect(function()
+	local character = player.Character
+	if character then
+		local humanoid = character:FindFirstChild("Humanoid")
+		if humanoid then
+			humanoid.Health = 0
+		end
+	end
+end)
+
+-- Open/Close Toggle Logic
+openButton.Activated:Connect(function()
+	frame.Visible = not frame.Visible
+	if frame.Visible then
+		openButton.Text = "Close"
+	else
+		openButton.Text = "Open"
+	end
+end)
