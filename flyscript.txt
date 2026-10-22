@@ -1,6 +1,7 @@
 local player = game.Players.LocalPlayer
+local playergui = player:WaitForChild("PlayerGui")
 local screengui = Instance.new("ScreenGui")
-screengui.Parent = player
+screengui.Parent = playergui
 
 -- gui
 
