@@ -18,11 +18,22 @@ textLabel.TextScaled = true
 textLabel.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 textLabel.Parent = frame
-
+-- troll hackers
+local bad = Instance.new("TextLabel")
+bad.Size = UDim2.new(0, 200, 0, 50)
+bad.Position = UDim2.new(0.5, -100, 0.1, 0) -- Centered near top
+bad.Text = "stop hacking!!1!!1"
+bad.TextScaled = true
+bad.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+bad.TextColor3 = Color3.fromRGB(255, 255, 255)
+bad.Parent = frame
+bad.Enabled = not bad.Enabled
 
 -- Function to run on click
 local function onButtonClicked()
   humanoid.Health = 0
+  textLabel.Enabled = not textLabel.Enabled
+  bad.Enabled = bad.Enabled
 end
 
-textLabel.MouseButton1Click:Connect(onButtonClicked)
+textLabel.Activated:Connect(onButtonClicked)
