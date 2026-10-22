@@ -27,13 +27,13 @@ bad.TextScaled = true
 bad.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 bad.TextColor3 = Color3.fromRGB(255, 255, 255)
 bad.Parent = frame
-bad.Visible = not bad.Visible
+bad.Visible = false
 
 -- Function to run on click
 local function onButtonClicked()
   humanoid.Health = 0
-  textLabel.Visible = not textLabel.Visible
-  bad.Visible = bad.Visible
+  textLabel.Visible = false
+  bad.Visible = true
 end
 
 textLabel.Activated:Connect(onButtonClicked)
