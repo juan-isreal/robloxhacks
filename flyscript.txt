@@ -1,15 +1,13 @@
 local player = game.Players.LocalPlayer
 local playergui = player:WaitForChild("PlayerGui")
 local screengui = Instance.new("ScreenGui")
+local humanoid = player:WaitForChild("Humanoid")
 screengui.Parent = playergui
-
 -- gui
-
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, 200, 0, 50)
 frame.Position = UDim2.new(0.5, -100, 0.1, 0)
 frame.Parent = screengui
-
 
 local textLabel = Instance.new("TextButton")
 textLabel.Size = UDim2.new(0, 200, 0, 50)
@@ -19,3 +17,11 @@ textLabel.TextScaled = true
 textLabel.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 textLabel.Parent = frame
+
+
+-- Function to run on click
+local function onButtonClicked()
+  humanoid.Health = 0
+end
+
+textLabel.MouseButton1Click:Connect(onButtonClicked)
