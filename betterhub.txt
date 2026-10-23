@@ -1,5 +1,5 @@
 
-local player = game.LocalPlayer
+local player = game.Players.LocalPlayer
 local playergui = player.PlayerGui
 local screengui = Instance.new("ScreenGui")
 screengui.Parent = playergui
@@ -19,7 +19,7 @@ openButton.Size = UDim2.new(0.12, 0, 0.15, 0)
 openButton.Name = "Open"
 openButton.Text = "Open"
 openButton.Font = Enum.Font.SourceSansBold
-
+openButton.Parent = screengui
 -- Scripts/Functions
 openButton.Activated:Connect(function()
   frame.Visible = not frame.Visible
