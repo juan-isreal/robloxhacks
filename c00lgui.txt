@@ -1,0 +1,458 @@
+-- ========================================================
+-- 1. CUSTOM UI LIBRARY (c00lgui Reborn - Dark/Crimson Theme)
+-- ========================================================
+local Library = {}
+
+function Library:CreateWindow(config)
+    config = config or {}
+    local titleText = config.Name or "c00lgui Reborn"
+    
+    local parent
+    local success = pcall(function()
+        parent = game:GetService("CoreGui")
+    end)
+    if not success or not parent then
+        parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+    end
+
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "C00lguiRebornGUI"
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = parent
+
+    -- Main Container Frame
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 480, 0, 440)
+    mainFrame.Position = UDim2.new(0.5, -240, 0.5, -220)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Active = true
+    mainFrame.Draggable = true
+    mainFrame.Parent = screenGui
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(200, 0, 0)
+    stroke.Thickness = 2
+    stroke.Parent = mainFrame
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = mainFrame
+
+    -- Title Bar
+    local topBar = Instance.new("Frame")
+    topBar.Size = UDim2.new(1, 0, 0, 36)
+    topBar.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+    topBar.BorderSizePixel = 0
+    topBar.Parent = mainFrame
+
+    local topCorner = Instance.new("UICorner")
+    topCorner.CornerRadius = UDim.new(0, 6)
+    topCorner.Parent = topBar
+
+    local cover = Instance.new("Frame")
+    cover.Size = UDim2.new(1, 0, 0, 6)
+    cover.Position = UDim2.new(0, 0, 1, -6)
+    cover.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+    cover.BorderSizePixel = 0
+    cover.Parent = topBar
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, -40, 1, 0)
+    title.Position = UDim2.new(0, 12, 0, 0)
+    title.BackgroundTransparency = 1
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.Text = titleText
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 15
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.Parent = topBar
+
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.new(0, 30, 0, 30)
+    closeBtn.Position = UDim2.new(1, -34, 0, 3)
+    closeBtn.BackgroundTransparency = 1
+    closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeBtn.Text = "X"
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.TextSize = 14
+    closeBtn.Parent = topBar
+
+    closeBtn.MouseButton1Click:Connect(function()
+        screenGui:Destroy()
+    end)
+
+    -- Scrollable Container
+    local container = Instance.new("ScrollingFrame")
+    container.Size = UDim2.new(1, -20, 1, -48)
+    container.Position = UDim2.new(0, 10, 0, 42)
+    container.BackgroundTransparency = 1
+    container.BorderSizePixel = 0
+    container.CanvasSize = UDim2.new(0, 0, 0, 0)
+    container.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    container.ScrollBarThickness = 4
+    container.Parent = mainFrame
+
+    local listLayout = Instance.new("UIListLayout")
+    listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    listLayout.Padding = UDim.new(0, 8)
+    listLayout.Parent = container
+
+    local windowObj = {}
+
+    function windowObj:AddButton(buttonText, callback)
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(1, 0, 0, 34)
+        btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        btn.BorderSizePixel = 0
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.Text = "  > " .. buttonText
+        btn.Font = Enum.Font.GothamMedium
+        btn.TextSize = 13
+        btn.TextXAlignment = Enum.TextXAlignment.Left
+        btn.Parent = container
+
+        local btnStroke = Instance.new("UIStroke")
+        btnStroke.Color = Color3.fromRGB(120, 0, 0)
+        btnStroke.Thickness = 1
+        btnStroke.Parent = btn
+
+        local btnCorner = Instance.new("UICorner")
+        btnCorner.CornerRadius = UDim.new(0, 4)
+        btnCorner.Parent = btn
+
+        btn.MouseButton1Click:Connect(function()
+            if callback then pcall(callback) end
+        end)
+    end
+
+    function windowObj:AddTextBox(placeholderText)
+        local boxFrame = Instance.new("Frame")
+        boxFrame.Size = UDim2.new(1, 0, 0, 50)
+        boxFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+        boxFrame.BorderSizePixel = 0
+        boxFrame.Parent = container
+
+        local boxStroke = Instance.new("UIStroke")
+        boxStroke.Color = Color3.fromRGB(120, 0, 0)
+        boxStroke.Thickness = 1
+        boxStroke.Parent = boxFrame
+
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 4)
+        corner.Parent = boxFrame
+
+        local textBox = Instance.new("TextBox")
+        textBox.Size = UDim2.new(1, -16, 1, -16)
+        textBox.Position = UDim2.new(0, 8, 0, 8)
+        textBox.BackgroundTransparency = 1
+        textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+        textBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
+        textBox.PlaceholderText = placeholderText or "Enter value here..."
+        textBox.Text = ""
+        textBox.ClearTextOnFocus = false
+        textBox.Font = Enum.Font.Code
+        textBox.TextSize = 12
+        textBox.TextXAlignment = Enum.TextXAlignment.Left
+        textBox.Parent = boxFrame
+
+        local boxObj = {}
+        function boxObj:GetText()
+            return textBox.Text
+        end
+        return boxObj
+    end
+
+    return windowObj
+end
+
+-- ==========================================================
+-- 2. c00lgui REBORN FEATURES (Client-Side Safe)
+-- ==========================================================
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+
+local window = Library:CreateWindow({
+    Name = "c00lgui v4 // REBORN"
+})
+
+local function getHumanoid()
+    local char = player.Character
+    if char then
+        return char:FindFirstChildOfClass("Humanoid"), char:FindFirstChild("HumanoidRootPart")
+    end
+    return nil, nil
+end
+
+-- Safe sound playback helper
+local function playClientSound(soundId)
+    pcall(function()
+        local sound = Instance.new("Sound")
+        sound.SoundId = "rbxassetid://" .. tostring(soundId)
+        sound.Volume = 0.5
+        sound.Parent = workspace
+        sound:Play()
+        sound.Ended:Connect(function() sound:Destroy() end)
+    end)
+end
+
+-- --- TAB 1: SERVER CONTROL ("c00lgui") ---
+window:AddButton("--- [ TAB 1: SERVER CONTROL ] ---", function() end)
+
+local assetInput = window:AddTextBox("Enter Decal / Skybox Asset ID...")
+
+window:AddButton("Decal Spam (Client Side)", function()
+    local id = assetInput:GetText()
+    if id == "" then id = "6023426915" end
+    for _, obj in pairs(Workspace:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            for _, face in pairs(Enum.NormalId:GetEnumItems()) do
+                pcall(function()
+                    local decal = Instance.new("Decal")
+                    decal.Face = face
+                    decal.Texture = "rbxassetid://" .. id
+                    decal.Parent = obj
+                end)
+            end
+        end
+    end
+end)
+
+window:AddButton("Set Skybox", function()
+    local id = assetInput:GetText()
+    if id ~= "" then
+        pcall(function()
+            local sky = Lighting:FindFirstChildOfClass("Sky") or Instance.new("Sky")
+            sky.SkyboxBk = "rbxassetid://" .. id
+            sky.SkyboxDn = "rbxassetid://" .. id
+            sky.SkyboxFt = "rbxassetid://" .. id
+            sky.SkyboxLf = "rbxassetid://" .. id
+            sky.SkyboxRt = "rbxassetid://" .. id
+            sky.SkyboxUp = "rbxassetid://" .. id
+            sky.Parent = Lighting
+        end)
+    end
+end)
+
+window:AddButton("Clear Local Workspace", function()
+    for _, child in pairs(Workspace:GetChildren()) do
+        if child ~= Workspace.Terrain and child ~= Workspace.CurrentCamera and not child:FindFirstChildOfClass("SpawnLocation") and child ~= player.Character then
+            pcall(function() child:Destroy() end)
+        end
+    end
+end)
+
+window:AddButton("Unanchor All Parts", function()
+    for _, part in pairs(Workspace:GetDescendants()) do
+        if part:IsA("BasePart") then
+            pcall(function() part.Anchored = false end)
+        end
+    end
+end)
+
+window:AddButton("Create Baseplate", function()
+    local bp = Instance.new("Part")
+    bp.Size = Vector3.new(512, 1, 512)
+    bp.Position = Vector3.new(0, -10, 0)
+    bp.Anchored = true
+    bp.BrickColor = BrickColor.new("Dark stone grey")
+    bp.Material = Enum.Material.Studs
+    bp.Parent = Workspace
+end)
+
+window:AddButton("Flood Workspace (Water Terrain)", function()
+    pcall(function()
+        Workspace.Terrain:FillRegion(Region3.new(Vector3.new(-500, -30, -500), Vector3.new(500, 5, 500)), 4, Enum.Material.Water)
+    end)
+end)
+
+local discoActive = false
+window:AddButton("Toggle Disco Lighting", function()
+    discoActive = not discoActive
+    task.spawn(function()
+        while discoActive do
+            Lighting.Ambient = Color3.fromRGB(math.random(0,255), math.random(0,255), math.random(0,255))
+            Lighting.FogColor = Color3.fromRGB(math.random(0,255), math.random(0,255), math.random(0,255))
+            task.wait(0.3)
+        end
+        Lighting.Ambient = Color3.fromRGB(128, 128, 128)
+    end)
+end)
+
+-- --- TAB 2: PLAYER & CHARACTER ("Local Player") ---
+window:AddButton("--- [ TAB 2: LOCAL PLAYER ] ---", function() end)
+
+local statInput = window:AddTextBox("Enter Speed or Jump Power value...")
+
+window:AddButton("Set WalkSpeed", function()
+    local hum, _ = getHumanoid()
+    local val = tonumber(statInput:GetText())
+    if hum and val then
+        hum.WalkSpeed = val
+    end
+end)
+
+window:AddButton("Set JumpPower", function()
+    local hum, _ = getHumanoid()
+    local val = tonumber(statInput:GetText())
+    if hum and val then
+        hum.UseJumpPower = true
+        hum.JumpPower = val
+    end
+end)
+
+local infJump = false
+window:AddButton("Toggle Infinite Jump", function()
+    infJump = not infJump
+end)
+
+UserInputService.JumpRequest:Connect(function()
+    if infJump then
+        local hum, _ = getHumanoid()
+        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+    end
+end)
+
+window:AddButton("Toggle Invisible", function()
+    local char = player.Character
+    if char then
+        for _, part in pairs(char:GetDescendants()) do
+            if part:IsA("BasePart") or part:IsA("Decal") then
+                part.Transparency = part.Transparency == 1 and 0 or 1
+            end
+        end
+    end
+end)
+
+local godMode = false
+window:AddButton("Toggle God Mode", function()
+    godMode = not godMode
+end)
+
+RunService.Heartbeat:Connect(function()
+    if godMode then
+        local hum, _ = getHumanoid()
+        if hum then hum.Health = hum.MaxHealth end
+    end
+end)
+
+local flying = false
+local bv, bg
+window:AddButton("Toggle Flight (Wings)", function()
+    flying = not flying
+    local hum, root = getHumanoid()
+    if not hum or not root then return end
+    
+    if flying then
+        hum.PlatformStand = true
+        bv = Instance.new("BodyVelocity")
+        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        bv.Velocity = Vector3.new(0, 0, 0)
+        bv.Parent = root
+        
+        bg = Instance.new("BodyGyro")
+        bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+        bg.CFrame = root.CFrame
+        bg.Parent = root
+    else
+        hum.PlatformStand = false
+        if bv then bv:Destroy() end
+        if bg then bg:Destroy() end
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if flying then
+        local _, root = getHumanoid()
+        if root and bv and bg then
+            local cam = workspace.CurrentCamera
+            local moveDir = Vector3.new(0, 0, 0)
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - cam.CFrame.RightVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + cam.CFrame.RightVector end
+            bv.Velocity = moveDir * 60
+            bg.CFrame = cam.CFrame
+        end
+    end
+end)
+
+-- --- TAB 3: TOOLS & WEAPONS ("Gears") ---
+window:AddButton("--- [ TAB 3: GEARS & WEAPONS ] ---", function() end)
+
+window:AddButton("Equip Grab Knife", function()
+    local tool = Instance.new("Tool")
+    tool.Name = "Grab Knife"
+    
+    local handle = Instance.new("Part")
+    handle.Name = "Handle"
+    handle.Size = Vector3.new(1, 0.8, 3)
+    handle.BrickColor = BrickColor.new("Really red")
+    handle.Material = Enum.Material.Neon
+    handle.Parent = tool
+
+    tool.Activated:Connect(function()
+        playClientSound(12221976) -- Generic slash sound effect
+    end)
+    
+    tool.Parent = player.Backpack
+end)
+
+local eyeLaserActive = false
+window:AddButton("Toggle Eyelaser", function()
+    eyeLaserActive = not eyeLaserActive
+    task.spawn(function()
+        local mouse = player:GetMouse()
+        while eyeLaserActive do
+            local char = player.Character
+            if char and char:FindFirstChild("Head") then
+                local head = char.Head
+                local laser = Instance.new("Part")
+                laser.Size = Vector3.new(0.2, 0.2, (head.Position - mouse.Hit.Position).Magnitude)
+                laser.CFrame = CFrame.new(head.Position, mouse.Hit.Position) * CFrame.new(0, 0, -laser.Size.Z / 2)
+                laser.BrickColor = BrickColor.new("Really red")
+                laser.Material = Enum.Material.Neon
+                laser.Anchored = true
+                laser.CanCollide = false
+                laser.Parent = Workspace
+                
+                game:GetService("Debris"):AddItem(laser, 0.05)
+            end
+            task.wait(0.05)
+        end
+    end)
+end)
+
+window:AddButton("Equip Dev Uzi", function()
+    local tool = Instance.new("Tool")
+    tool.Name = "Dev Uzi"
+    
+    local handle = Instance.new("Part")
+    handle.Name = "Handle"
+    handle.Size = Vector3.new(1, 1, 2)
+    handle.BrickColor = BrickColor.new("Black")
+    handle.Parent = tool
+
+    tool.Activated:Connect(function()
+        local mouse = player:GetMouse()
+        local char = player.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            local bullet = Instance.new("Part")
+            bullet.Size = Vector3.new(0.4, 0.4, 1)
+            bullet.BrickColor = BrickColor.new("New Yeller")
+            bullet.Material = Enum.Material.Neon
+            bullet.CFrame = CFrame.new(handle.Position, mouse.Hit.Position)
+            bullet.Velocity = (mouse.Hit.Position - handle.Position).Unit * 300
+            bullet.Parent = Workspace
+            
+            game:GetService("Debris"):AddItem(bullet, 2)
+            playClientSound(130138435)
+        end
+    end)
+    
+    tool.Parent = player.Backpack
+end)
