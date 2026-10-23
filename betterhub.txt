@@ -1,1 +1,26 @@
 
+local player = game.LocalPlayer
+local playergui = player.PlayerGui
+local screengui = Instance.new("ScreenGui")
+screengui.Parent = playergui
+screengui.Name = "ScreenGui"
+
+-- GUI
+local frame = Instance.new("Frame")
+frame.Name = "Panel"
+frame.Size = UDim2.new(0, 0.54, 0, 0.76)
+frame.Position = UDim2.new(0.3, 0, 0.15, 0)
+frame.Parent = screengui
+frame.Visible = false
+-- Open
+local openButton = Instance.new("TextButton")
+openButton.Position = UDim2.new(0.175, 0, 0.15, 0)
+openButton.Size = UDim2.new(0.12, 0, 0.15, 0)
+openButton.Name = "Open"
+openButton.Text = "Open"
+openButton.Font = Enum.Font.SourceSansBold
+
+-- Scripts/Functions
+openButton.Activated:Connect(funtion()
+  frame.Visible = not frame.Visible
+end)
