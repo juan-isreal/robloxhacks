@@ -12,6 +12,8 @@ frame.Size = UDim2.new(0.54, 0, 0.75, 0)
 frame.Position = UDim2.new(0.3, 0, 0.15, 0)
 frame.Parent = screengui
 frame.Visible = false
+local frameUiCorner = Instance.new("UICorner")
+frameUiCorner.Parent = frame
 -- Open
 local openButton = Instance.new("TextButton")
 openButton.Position = UDim2.new(0.175, 0, 0.15, 0)
@@ -20,6 +22,8 @@ openButton.Name = "Open"
 openButton.Text = "Open"
 openButton.Font = Enum.Font.SourceSansBold
 openButton.Parent = screengui
+local openButtonUiCorner = Instance.new("UICorner")
+openButtonUiCorner.Parent = openButton
 -- Scripts/Functions
 openButton.Activated:Connect(function()
   frame.Visible = not frame.Visible
