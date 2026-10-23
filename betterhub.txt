@@ -21,6 +21,6 @@ openButton.Text = "Open"
 openButton.Font = Enum.Font.SourceSansBold
 
 -- Scripts/Functions
-openButton.Activated:Connect(funtion()
+openButton.Activated:Connect(function()
   frame.Visible = not frame.Visible
 end)
