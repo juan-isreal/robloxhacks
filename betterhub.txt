@@ -8,7 +8,7 @@ screengui.Name = "ScreenGui"
 -- GUI
 local frame = Instance.new("Frame")
 frame.Name = "Panel"
-frame.Size = UDim2.new(0, 0.54, 0, 0.76)
+frame.Size = UDim2.new(0.54, 0, 0.75, 0)
 frame.Position = UDim2.new(0.3, 0, 0.15, 0)
 frame.Parent = screengui
 frame.Visible = false
