@@ -1,0 +1,155 @@
+local Library = {}
+
+function Library:CreateWindow(config)
+    config = config or {}
+    local titleText = config.Name or "Executor UI"
+    
+    local parent
+    local success = pcall(function()
+        parent = game:GetService("CoreGui")
+    end)
+    if not success or not parent then
+        parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+    end
+
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "CustomExploitUI"
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = parent
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 450, 0, 340)
+    mainFrame.Position = UDim2.new(0.5, -225, 0.5, -170)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Active = true
+    mainFrame.Draggable = true
+    mainFrame.Parent = screenGui
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = mainFrame
+
+    -- Top Title Bar
+    local topBar = Instance.new("Frame")
+    topBar.Size = UDim2.new(1, 0, 0, 36)
+    topBar.BackgroundColor3 = Color3.fromRGB(26, 26, 35)
+    topBar.BorderSizePixel = 0
+    topBar.Parent = mainFrame
+
+    local topCorner = Instance.new("UICorner")
+    topCorner.CornerRadius = UDim.new(0, 8)
+    topCorner.Parent = topBar
+
+    local cover = Instance.new("Frame")
+    cover.Size = UDim2.new(1, 0, 0, 6)
+    cover.Position = UDim2.new(0, 0, 1, -6)
+    cover.BackgroundColor3 = Color3.fromRGB(26, 26, 35)
+    cover.BorderSizePixel = 0
+    cover.Parent = topBar
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, -40, 1, 0)
+    title.Position = UDim2.new(0, 12, 0, 0)
+    title.BackgroundTransparency = 1
+    title.TextColor3 = Color3.fromRGB(235, 235, 245)
+    title.Text = titleText
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 14
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.Parent = topBar
+
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.new(0, 30, 0, 30)
+    closeBtn.Position = UDim2.new(1, -34, 0, 3)
+    closeBtn.BackgroundTransparency = 1
+    closeBtn.TextColor3 = Color3.fromRGB(160, 160, 180)
+    closeBtn.Text = "X"
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.TextSize = 14
+    closeBtn.Parent = topBar
+
+    closeBtn.MouseButton1Click:Connect(function()
+        screenGui:Destroy()
+    end)
+
+    -- Scrolling Content Container
+    local container = Instance.new("ScrollingFrame")
+    container.Size = UDim2.new(1, -20, 1, -48)
+    container.Position = UDim2.new(0, 10, 0, 42)
+    container.BackgroundTransparency = 1
+    container.BorderSizePixel = 0
+    container.CanvasSize = UDim2.new(0, 0, 0, 0)
+    container.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    container.ScrollBarThickness = 4
+    container.Parent = mainFrame
+
+    local listLayout = Instance.new("UIListLayout")
+    listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    listLayout.Padding = UDim.new(0, 8)
+    listLayout.Parent = container
+
+    local windowObj = {}
+
+    -- Add a standard Button
+    function windowObj:AddButton(buttonText, callback)
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(1, 0, 0, 34)
+        btn.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
+        btn.BorderSizePixel = 0
+        btn.TextColor3 = Color3.fromRGB(210, 210, 225)
+        btn.Text = "  " .. buttonText
+        btn.Font = Enum.Font.GothamMedium
+        btn.TextSize = 13
+        btn.TextXAlignment = Enum.TextXAlignment.Left
+        btn.Parent = container
+
+        local btnCorner = Instance.new("UICorner")
+        btnCorner.CornerRadius = UDim.new(0, 6)
+        btnCorner.Parent = btn
+
+        btn.MouseButton1Click:Connect(function()
+            if callback then pcall(callback) end
+        end)
+    end
+
+    -- Add a Text Box (Script Editor / String Input)
+    function windowObj:AddTextBox(placeholderText)
+        local boxFrame = Instance.new("Frame")
+        boxFrame.Size = UDim2.new(1, 0, 0, 110)
+        boxFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
+        boxFrame.BorderSizePixel = 0
+        boxFrame.Parent = container
+
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 6)
+        corner.Parent = boxFrame
+
+        local textBox = Instance.new("TextBox")
+        textBox.Size = UDim2.new(1, -16, 1, -16)
+        textBox.Position = UDim2.new(0, 8, 0, 8)
+        textBox.BackgroundTransparency = 1
+        textBox.TextColor3 = Color3.fromRGB(230, 230, 240)
+        textBox.PlaceholderColor3 = Color3.fromRGB(100, 100, 120)
+        textBox.PlaceholderText = placeholderText or "Paste your script here..."
+        textBox.Text = ""
+        textBox.MultiLine = true
+        textBox.ClearTextOnFocus = false
+        textBox.Font = Enum.Font.Code
+        textBox.TextSize = 12
+        textBox.TextXAlignment = Enum.TextXAlignment.Left
+        textBox.TextYAlignment = Enum.TextYAlignment.Top
+        textBox.Parent = boxFrame
+
+        local boxObj = {}
+        function boxObj:GetText()
+            return textBox.Text
+        end
+        return boxObj
+    end
+
+    return windowObj
+end
+
+Library:CreateWindow()
+
