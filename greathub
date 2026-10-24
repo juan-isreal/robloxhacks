@@ -1,0 +1,271 @@
+--[[
+	UILib - args-based UI builder for Roblox games (LocalScript version).
+
+	Size and position are 4-number tables, in the same order as UDim2.new:
+		{scaleX, offsetX, scaleY, offsetY}
+
+	FUNCTIONS (each returns the Instance it creates)
+
+	createScreenGui(name, parent?)
+	createFrame(parent, size, position, color?)
+	createScrollingFrame(parent, size, position, canvasSize?, color?)
+		canvasSize is {scaleX, offsetX, scaleY, offsetY}, default {0, 0, 2, 0}
+	createLabel(parent, size, position, text?, color?)
+	createButton(parent, size, position, callback?, text?, color?)
+		callback() runs when the button is clicked or tapped
+	createSlider(parent, size, position, callback?, default?, onChange?)
+		callback(value) runs when the slider loses focus (pointer released)
+		onChange(value) is optional and runs while dragging
+		value is always an integer from 0 to 255
+		the current value is also stored on the slider as the "Value" attribute
+]]
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+local UILib = {}
+
+local Colors = {
+	Background = Color3.fromRGB(30, 30, 36),
+	Element = Color3.fromRGB(52, 52, 64),
+	Accent = Color3.fromRGB(88, 130, 255),
+	Text = Color3.fromRGB(235, 235, 240),
+}
+
+----------------------------------------------------------------------
+-- Helpers
+----------------------------------------------------------------------
+
+local function toUDim2(values)
+	values = values or {}
+	return UDim2.new(values[1] or 0, values[2] or 0, values[3] or 0, values[4] or 0)
+end
+
+local function safeCall(callback, ...)
+	if typeof(callback) == "function" then
+		local ok, err = pcall(callback, ...)
+		if not ok then
+			warn("[UILib] callback error: " .. tostring(err))
+		end
+	end
+end
+
+local function clamp255(n)
+	n = tonumber(n) or 0
+	return math.clamp(math.floor(n + 0.5), 0, 255)
+end
+
+local function isPointerDown(input)
+	return input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch
+end
+
+local function isPointerMove(input)
+	return input.UserInputType == Enum.UserInputType.MouseMovement
+		or input.UserInputType == Enum.UserInputType.Touch
+end
+
+local function addCorner(inst, radius)
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, radius or 6)
+	corner.Parent = inst
+end
+
+----------------------------------------------------------------------
+-- ScreenGui
+----------------------------------------------------------------------
+
+function UILib.createScreenGui(name, parent)
+	local gui = Instance.new("ScreenGui")
+	gui.Name = name or "ScreenGui"
+	gui.ResetOnSpawn = false
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	gui.Parent = parent or Players.LocalPlayer:WaitForChild("PlayerGui")
+	return gui
+end
+
+----------------------------------------------------------------------
+-- Frame
+----------------------------------------------------------------------
+
+function UILib.createFrame(parent, size, position, color)
+	local frame = Instance.new("Frame")
+	frame.Size = toUDim2(size)
+	frame.Position = toUDim2(position)
+	frame.BackgroundColor3 = color or Colors.Background
+	frame.BorderSizePixel = 0
+	addCorner(frame)
+	frame.Parent = parent
+	return frame
+end
+
+----------------------------------------------------------------------
+-- ScrollingFrame
+----------------------------------------------------------------------
+
+function UILib.createScrollingFrame(parent, size, position, canvasSize, color)
+	local scroller = Instance.new("ScrollingFrame")
+	scroller.Size = toUDim2(size)
+	scroller.Position = toUDim2(position)
+	scroller.BackgroundColor3 = color or Colors.Background
+	scroller.BorderSizePixel = 0
+	scroller.ScrollBarThickness = 5
+	scroller.ScrollBarImageColor3 = Colors.Accent
+	scroller.CanvasSize = toUDim2(canvasSize or { 0, 0, 2, 0 })
+	addCorner(scroller)
+	scroller.Parent = parent
+	return scroller
+end
+
+----------------------------------------------------------------------
+-- Label
+----------------------------------------------------------------------
+
+function UILib.createLabel(parent, size, position, text, color)
+	local label = Instance.new("TextLabel")
+	label.Size = toUDim2(size)
+	label.Position = toUDim2(position)
+	label.BackgroundTransparency = 1
+	label.Text = text or ""
+	label.TextColor3 = color or Colors.Text
+	label.Font = Enum.Font.GothamMedium
+	label.TextSize = 14
+	label.TextWrapped = true
+	label.Parent = parent
+	return label
+end
+
+----------------------------------------------------------------------
+-- Button
+----------------------------------------------------------------------
+
+function UILib.createButton(parent, size, position, callback, text, color)
+	local button = Instance.new("TextButton")
+	button.Size = toUDim2(size)
+	button.Position = toUDim2(position)
+	button.BackgroundColor3 = color or Colors.Element
+	button.BorderSizePixel = 0
+	button.Text = text or "Button"
+	button.TextColor3 = Colors.Text
+	button.Font = Enum.Font.GothamMedium
+	button.TextSize = 14
+	addCorner(button)
+	button.Parent = parent
+
+	button.Activated:Connect(function()
+		safeCall(callback)
+	end)
+
+	return button
+end
+
+----------------------------------------------------------------------
+-- Slider (always 0 - 255)
+----------------------------------------------------------------------
+
+function UILib.createSlider(parent, size, position, callback, default, onChange)
+	local value = clamp255(default)
+
+	local holder = Instance.new("Frame")
+	holder.Size = toUDim2(size)
+	holder.Position = toUDim2(position)
+	holder.BackgroundColor3 = Colors.Element
+	holder.BorderSizePixel = 0
+	addCorner(holder)
+	holder.Parent = parent
+
+	local bar = Instance.new("Frame")
+	bar.Size = UDim2.new(1, -24, 0, 6)
+	bar.Position = UDim2.new(0, 12, 0.5, -3)
+	bar.BackgroundColor3 = Colors.Background
+	bar.BorderSizePixel = 0
+	addCorner(bar, 3)
+	bar.Parent = holder
+
+	local fill = Instance.new("Frame")
+	fill.BackgroundColor3 = Colors.Accent
+	fill.BorderSizePixel = 0
+	addCorner(fill, 3)
+	fill.Parent = bar
+
+	local knob = Instance.new("Frame")
+	knob.Size = UDim2.fromOffset(14, 14)
+	knob.AnchorPoint = Vector2.new(0.5, 0.5)
+	knob.BackgroundColor3 = Colors.Text
+	knob.BorderSizePixel = 0
+	addCorner(knob, 7)
+	knob.Parent = bar
+
+	local function render()
+		local alpha = value / 255
+		fill.Size = UDim2.fromScale(alpha, 1)
+		knob.Position = UDim2.new(alpha, 0, 0.5, 0)
+		holder:SetAttribute("Value", value)
+	end
+	render()
+
+	local function setFromX(x)
+		local width = bar.AbsoluteSize.X
+		if width <= 0 then
+			return
+		end
+		local alpha = math.clamp((x - bar.AbsolutePosition.X) / width, 0, 1)
+		local newValue = clamp255(alpha * 255)
+		if newValue ~= value then
+			value = newValue
+			render()
+			safeCall(onChange, value)
+		end
+	end
+
+	local dragging = false
+
+	holder.InputBegan:Connect(function(input)
+		if isPointerDown(input) then
+			dragging = true
+			setFromX(input.Position.X)
+		end
+	end)
+
+	local moveConnection = UserInputService.InputChanged:Connect(function(input)
+		if dragging and isPointerMove(input) then
+			setFromX(input.Position.X)
+		end
+	end)
+
+	local endConnection = UserInputService.InputEnded:Connect(function(input)
+		if dragging and isPointerDown(input) then
+			dragging = false
+			safeCall(callback, clamp255(value))
+		end
+	end)
+
+	holder.Destroying:Connect(function()
+		moveConnection:Disconnect()
+		endConnection:Disconnect()
+	end)
+
+	return holder
+end
+
+----------------------------------------------------------------------
+-- Example Usage (Runs immediately inside this LocalScript)
+----------------------------------------------------------------------
+local screenGui = UILib.createScreenGui("KillGUI")
+local mainFrame = UILib.createFrame(screenGui, {0, 300, 0, 200}, {0.5, -150, 0.5, -100})
+
+UILib.createLabel(mainFrame, {1, 0, 0, 30}, {0, 0, 0, 10})
+
+UILib.createButton(mainFrame, {0, 200, 0, 40}, {0.5, -100, 0, 60}, function()
+	local player = game.Players.LocalPlayer
+  local char = player.Character
+  local humanoid = char.Humanoid
+  if humanoid then 
+    humanoid.Health = 0
+  end
+end, "Reset")
+
+UILib.createSlider(mainFrame, {0, 260, 0, 40}, {0.5, -130, 0, 120}, function(val)
+	print("Slider released with value:", val)
+end, 128)
+
