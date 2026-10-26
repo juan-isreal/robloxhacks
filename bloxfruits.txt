@@ -1,3 +1,0 @@
-local module = require(game:GetService("ReplicatedStorage").Osiris.Admin)
-
-print(module)
