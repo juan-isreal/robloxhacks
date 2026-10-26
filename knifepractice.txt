@@ -1,12 +1,19 @@
+-- Services
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Event = game:GetService("ReplicatedStorage").Remotes.Misc.ShootingRangeTrashItems
-Event:FireServer()
-local Event = game:GetService("ReplicatedStorage").Remotes.Replication.Fighter.PickWeapons
-Event:FireServer(
-    {
-        "Bow",
-        "Daggers",
-        "Knife",
-        "War Horn"
-    }
-)
+-- Remotes
+local LeaveRange = ReplicatedStorage.Remotes.Misc.ShootingRangeLeave
+local EnterRange = ReplicatedStorage.Remotes.Misc.ShootingRangeEnter
+local PickWeapons = ReplicatedStorage.Remotes.Replication.Fighter.PickWeapons
+LeaveRange:FireServer()
+task.wait(0.1)
+
+EnterRange:FireServer()
+task.wait(0.1)
+PickWeapons:FireServer({
+    [1] = "Bow",
+    [2] = "Daggers",
+    [3] = "Knife",
+    [4] = "War Horn"
+})
+
