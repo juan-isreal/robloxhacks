@@ -38,3 +38,5 @@ function Dash()
   	return OldFireServer(self, ...)
   end)
 end
+
+return Dash
